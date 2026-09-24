@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.5.2
+- Fixed Jest validation warning (`setupFilesAfterEach` is not a Jest option)
+- `ccUserTz()` memoized per execution (was calling CalendarApp 3–5× per click)
+- `CC.VERSION` aligned with `package.json`
+- Handoff doc moved to repo root (`CONTEXT.md`); README link fixed
+- No behavior changes
+
 ## v0.5.1
 - Time zone: working hours, anti-calendar day, prophecy, resurface, wander,
   echo and insights use the user's calendar time zone (`src/utils/tz.gs`);

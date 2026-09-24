@@ -25,13 +25,13 @@ Chaos magick, minus the incense.
 
 v0.5.1 — time-zone fix, fewer permissions, CC0. 47 tests passing.
 
-See [src/store/context.md](src/store/context.md) for current state, architecture, and next steps.
+See [CONTEXT.md](CONTEXT.md) for current state, architecture, and next steps.
 
 ## Docs
 
 - [docs/install.md](docs/install.md) — how to install locally
 - [docs/architecture.md](docs/architecture.md) — how the code is structured
-- [src/store/context.md](src/store/context.md) — where development stands right now
+- [CONTEXT.md](CONTEXT.md) — where development stands right now
 
 ## Install (quick)
 

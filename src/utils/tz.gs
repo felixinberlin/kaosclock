@@ -10,6 +10,8 @@
  * independent of the machine's TZ.
  */
 
+ let CC_USER_TZ_CACHE = null;
+
 const CC_TZ_FORMATTERS = {};
 
 function ccTzFormatter(tz) {
@@ -66,13 +68,18 @@ function ccTzAtHour(ms, dayOffset, hour, tz) {
 
 /** The user's zone: their calendar's, then the script's, then UTC. */
 function ccUserTz() {
+  if (CC_USER_TZ_CACHE) return CC_USER_TZ_CACHE;
+
   try {
     const tz = CalendarApp.getDefaultCalendar().getTimeZone();
-    if (tz) return tz;
+    if (tz) { CC_USER_TZ_CACHE = tz; return tz; }
   } catch (err) { /* fall through */ }
+
   try {
     const tz = Session.getScriptTimeZone();
-    if (tz) return tz;
+    if (tz) { CC_USER_TZ_CACHE = tz; return tz; }
   } catch (err) { /* fall through */ }
+
+  CC_USER_TZ_CACHE = 'UTC';
   return 'UTC';
 }

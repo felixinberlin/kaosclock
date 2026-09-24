@@ -1,5 +1,5 @@
 const CC = {
-  VERSION: '0.5.0',
+  VERSION: '0.5.2',
   SHEET_NAME: 'Chaos Clock Log',
   TABS: {
     SESSIONS: 'Sessions',

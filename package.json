@@ -1,12 +1,11 @@
 {
   "name": "chaos-clock",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "private": true,
   "description": "Chaos Clock — a Google Calendar add-on that rolls focus modes and rearranges your time.",
   "license": "CC0-1.0",
   "scripts": {
     "test": "TZ=UTC jest",
-    "test:watch": "TZ=UTC jest --watch",
     "push": "clasp push",
     "open": "clasp open"
   },
