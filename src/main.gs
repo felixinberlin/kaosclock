@@ -1,6 +1,6 @@
 function onHomepage(e) {
   const settings = ccGetSettings();
-  if (ccIsAntiCalendarDay(new Date(), settings)) {
+  if (ccIsAntiCalendarDay(new Date(), settings, ccUserTz())) {
     return ccBuildAntiCalendarCard();
   }
   return ccBuildHomeCard();
@@ -14,7 +14,7 @@ function onRoll(e) {
   const settings = ccGetSettings();
 
   // Anti-Calendar Day blocks rolling
-  if (ccIsAntiCalendarDay(new Date(), settings)) {
+  if (ccIsAntiCalendarDay(new Date(), settings, ccUserTz())) {
     return ccRespondWithCard(ccBuildAntiCalendarCard());
   }
 
@@ -71,7 +71,8 @@ function onRoll(e) {
     durationMin: roll.duration,
     schedule: input.schedule,
     driftMin: roll.driftMin || 0,
-    busy: busy
+    busy: busy,
+    tz: ccUserTz()
   });
   let start = slot.start;
   let end = slot.end;
@@ -111,7 +112,7 @@ function onRoll(e) {
       description: 'A phantom slot. Fill it or let it vanish.'
     });
     ccAppendRow(CC.TABS.CHAOS, [now, 'phantomSlot', ev.getId(), input.chaos, roll.sigil]);
-    phantomNote = 'Phantom slot at ' + Utilities.formatDate(pStart, Session.getScriptTimeZone(), 'HH:mm') + '.';
+    phantomNote = 'Phantom slot at ' + Utilities.formatDate(pStart, ccUserTz(), 'HH:mm') + '.';
   }
 
   // Reluctant servitor
@@ -149,7 +150,7 @@ function onSaveLog(e) {
   const ghost = ccPlanPoltergeist(
     { id: sessionId, rolledAt: session.rolledAt, intent: session.intent,
       mode: session.mode, duration: session.duration, completed: true },
-    Number(session.chaos) || 0, ccRng
+    Number(session.chaos) || 0, ccRng, ccUserTz()
   );
   if (ghost) {
     ccCreateEvent(ghost);

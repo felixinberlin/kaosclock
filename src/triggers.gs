@@ -2,8 +2,9 @@ function installTriggers() {
   const existing = ScriptApp.getProjectTriggers();
   for (let i = 0; i < existing.length; i++) ScriptApp.deleteTrigger(existing[i]);
 
-  ScriptApp.newTrigger('dailyChaos').timeBased().everyDays(1).atHour(5).create();
-  ScriptApp.newTrigger('weeklyConfession').timeBased().onWeekDay(ScriptApp.WeekDay.SUNDAY).atHour(20).create();
+  const tz = ccUserTz();
+  ScriptApp.newTrigger('dailyChaos').timeBased().everyDays(1).atHour(5).inTimezone(tz).create();
+  ScriptApp.newTrigger('weeklyConfession').timeBased().onWeekDay(ScriptApp.WeekDay.SUNDAY).atHour(20).inTimezone(tz).create();
   ccInfo('triggers installed');
 }
 
@@ -24,7 +25,7 @@ function dailyChaos() {
 }
 
 function ccRunProphecy(settings, now) {
-  const plan = ccPlanProphecy(settings, now, ccRng);
+  const plan = ccPlanProphecy(settings, now, ccRng, ccUserTz());
   if (!plan) return;
   const ev = ccCreateEvent(plan);
   ccAppendRow(CC.TABS.CHAOS, [now, 'prophecy', ev.getId(), settings.chaos, plan.title]);
@@ -47,8 +48,7 @@ function ccRunResurface(sessions, now, settings) {
 
   const dayOffset = ccRandInt(1, 3, rng);
   const hour = ccRandInt(9, 20, rng);
-  const start = new Date(now.getTime() + dayOffset * 86400000);
-  start.setHours(hour, 0, 0, 0);
+  const start = new Date(ccTzAtHour(now.getTime(), dayOffset, hour, ccUserTz()));
   const end = new Date(start.getTime() + (Number(pick.duration) || 15) * 60000);
 
   const mode = ccMode(pick.mode) || ccMode('banish');
@@ -69,11 +69,12 @@ function ccRunResurface(sessions, now, settings) {
 
 function ccRunWander(sessions, now, settings) {
   const rng = ccRng;
+  const tz = ccUserTz();
   for (let i = 0; i < sessions.length; i++) {
     const s = sessions[i];
     if (!s.eventId) continue;
     if (s.completed) continue;
-    const plan = ccPlanWander(s, now, rng);
+    const plan = ccPlanWander(s, now, rng, tz);
     if (!plan) continue;
     if (ccMoveEvent(s.eventId, plan.newStart, plan.newEnd)) {
       const wanderCount = (Number(s.wanderCount) || 0) + 1;

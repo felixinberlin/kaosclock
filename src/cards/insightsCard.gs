@@ -1,6 +1,6 @@
 function ccBuildInsightsCard() {
   const sessions = ccRecentSessions(200);
-  const insights = ccComputeInsights(sessions, new Date());
+  const insights = ccComputeInsights(sessions, new Date(), ccUserTz());
 
   const card = CardService.newCardBuilder();
   card.setHeader(CardService.newCardHeader()

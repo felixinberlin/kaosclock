@@ -55,3 +55,16 @@ describe('ccRoll', function () {
     }
   });
 });
+
+describe('chaos 0 is fully deterministic', function () {
+  test('same inputs, same roll, whatever the rng says', function () {
+    const input = { intent: 'Finish landing page copy', energy: 4, focus: 4, timeAvailable: 60, chaos: 0 };
+    const a = cc.ccRoll(input, cc.ccMulberry32(1));
+    const b = cc.ccRoll(input, cc.ccMulberry32(999));
+    const c = cc.ccRoll(input, Math.random);
+    expect(b).toEqual(a);
+    expect(c).toEqual(a);
+    expect(a.driftMin).toBe(0);
+    expect(a.phantom).toBe(false);
+  });
+});

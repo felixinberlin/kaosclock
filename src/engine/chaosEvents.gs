@@ -28,8 +28,9 @@ function ccPickResurfaceCandidate(sessions, now, settings, rng) {
 
 /* ---------- Wandering ---------- */
 
-function ccPlanWander(session, now, rng) {
+function ccPlanWander(session, now, rng, tz) {
   rng = rng || ccRng;
+  tz = tz || 'UTC';
   const flow = Number(session.flow) || 0;
   if (session.completed && flow > CC.WANDER_MIN_FLOW) return null;
   const wanderCount = Number(session.wanderCount) || 0;
@@ -40,16 +41,8 @@ function ccPlanWander(session, now, rng) {
 
   const shiftOptions = [
     function () { return start.getTime() + ccRandInt(15, 90, rng) * 60000; },
-    function () {
-      const d = new Date(start.getTime() + 86400000);
-      d.setHours(9 + ccRandInt(0, 4, rng), 0, 0, 0);
-      return d.getTime();
-    },
-    function () {
-      const d = new Date(start.getTime() + 86400000);
-      d.setHours(18 + ccRandInt(0, 3, rng), 0, 0, 0);
-      return d.getTime();
-    }
+    function () { return ccTzAtHour(start.getTime(), 1, 9 + ccRandInt(0, 4, rng), tz); },
+    function () { return ccTzAtHour(start.getTime(), 1, 18 + ccRandInt(0, 3, rng), tz); }
   ];
   const newStartMs = shiftOptions[Math.floor(rng() * shiftOptions.length)]();
   return { newStart: new Date(newStartMs), newEnd: new Date(newStartMs + durationMs) };
@@ -100,15 +93,16 @@ function ccPlanPastTense(modeName, intent, chaos, now, rng) {
 
 /* ---------- Poltergeist ---------- */
 
-function ccPlanPoltergeist(session, chaos, rng) {
+function ccPlanPoltergeist(session, chaos, rng, tz) {
   rng = rng || ccRng;
+  tz = tz || 'UTC';
   if (chaos < CC.POLTERGEIST_MIN_CHAOS) return null;
   if (!session.completed) return null;
   if (rng() > CC.POLTERGEIST_CHANCE) return null;
 
   const originalStart = new Date(session.rolledAt);
-  const echoStart = new Date(originalStart.getTime() + 7 * 86400000);
-  echoStart.setHours(originalStart.getHours(), 0, 0, 0);
+  const localHour = ccTzParts(originalStart.getTime(), tz).hour;
+  const echoStart = new Date(ccTzAtHour(originalStart.getTime(), 7, localHour, tz));
   const duration = Number(session.duration) || 15;
   const mode = ccMode(session.mode) || { name: '?' };
   return {
@@ -121,13 +115,13 @@ function ccPlanPoltergeist(session, chaos, rng) {
 
 /* ---------- Prophecy ---------- */
 
-function ccPlanProphecy(settings, now, rng) {
+function ccPlanProphecy(settings, now, rng, tz) {
   rng = rng || ccRng;
+  tz = tz || 'UTC';
   if (!settings.flags.prophecy) return null;
   if (rng() > 0.15) return null; // ~once a week at daily trigger
   const days = ccRandInt(3, CC.PROPHECY_HORIZON_DAYS, rng);
-  const start = new Date(now.getTime() + days * 86400000);
-  start.setHours(10, 0, 0, 0);
+  const start = new Date(ccTzAtHour(now.getTime(), days, 10, tz));
   const end = new Date(start.getTime() + 30 * 60000);
   return {
     title: '[Gnosis] You\'ll know what this is for.',
@@ -148,10 +142,11 @@ function ccRollTrickster(chaos, settings, rng) {
 
 /* ---------- Anti-Calendar Day ---------- */
 
-function ccIsAntiCalendarDay(now, settings) {
+function ccIsAntiCalendarDay(now, settings, tz) {
   if (!settings.flags.antiCalendarDay) return false;
-  const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-  return now.getDate() === lastDay;
+  const p = ccTzParts(now.getTime(), tz || 'UTC');
+  const lastDay = new Date(Date.UTC(p.year, p.month, 0)).getUTCDate();
+  return p.day === lastDay;
 }
 
 /* ---------- Confession ---------- */

@@ -17,7 +17,7 @@ function ccBuildSettingsCard(savedMessage) {
     ['reluctantServitor', 'Reluctant Servitor', 'Passive-aggressive nudges'],
     ['pastTense', 'Past Tense', 'Schedule things in the past'],
     ['poltergeist', 'Poltergeist', 'Echo completed events next week'],
-    ['prophecy', 'Prophecy', 'Locked future event, vague title'],
+    ['prophecy', 'Prophecy', 'Future event, vague title'],
     ['trickster', 'Trickster', '5% chance of a mystery roll'],
     ['antiCalendarDay', 'Anti-Calendar Day', 'One day/month, no rolling'],
     ['confession', 'Confession Log', 'Weekly summary in the Sheet']

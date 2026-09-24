@@ -2,7 +2,8 @@
  * Pure slot finder. Takes busy intervals, working hours, and a search
  * window; returns the earliest free slot that fits.
  *
- * All times are epoch ms except where noted.
+ * All times are epoch ms except where noted. workStart/workEnd are
+ * wall-clock hours in opts.tz (IANA zone, default 'UTC').
  */
 function ccFindSlotPure(opts) {
   const from = opts.from;
@@ -14,33 +15,32 @@ function ccFindSlotPure(opts) {
   const graceMs = (opts.graceMin || 0) * 60000;
   const minGapMs = (opts.minGapMin || 0) * 60000;
   const nowMs = opts.now || Date.now();
+  const tz = opts.tz || 'UTC';
 
   const earliest = Math.max(from, nowMs + graceMs);
   const limit = earliest + horizonMs;
 
-  let cursor = new Date(earliest);
+  let cursor = earliest;
 
-  while (cursor.getTime() < limit) {
-    const dayStart = new Date(cursor);
-    dayStart.setHours(workStart, 0, 0, 0);
-    const dayEnd = new Date(cursor);
-    dayEnd.setHours(workEnd, 0, 0, 0);
+  while (cursor < limit) {
+    const dayStartMs = ccTzAtHour(cursor, 0, workStart, tz);
+    const dayEndMs = ccTzAtHour(cursor, 0, workEnd, tz);
 
-    let scan = Math.max(cursor.getTime(), dayStart.getTime());
+    let scan = Math.max(cursor, dayStartMs);
 
-    if (scan < dayEnd.getTime()) {
+    if (scan < dayEndMs) {
       let placed = null;
       for (let i = 0; i < busy.length; i++) {
         const b = busy[i];
         if (b.end <= scan) continue;
-        if (b.start >= dayEnd.getTime()) break;
+        if (b.start >= dayEndMs) break;
         if (b.start - scan >= durationMs + minGapMs) {
           placed = scan;
           break;
         }
         if (b.end > scan) scan = b.end + minGapMs;
       }
-      if (placed === null && dayEnd.getTime() - scan >= durationMs + minGapMs) {
+      if (placed === null && dayEndMs - scan >= durationMs + minGapMs) {
         placed = scan;
       }
       if (placed !== null) {
@@ -49,9 +49,7 @@ function ccFindSlotPure(opts) {
     }
 
     // Next day, at work start.
-    const nextDay = new Date(dayStart.getTime() + 86400000);
-    nextDay.setHours(workStart, 0, 0, 0);
-    cursor = nextDay;
+    cursor = ccTzAtHour(dayStartMs, 1, workStart, tz);
   }
 
   return null;
@@ -81,7 +79,8 @@ function ccPlanSlotForRoll(input) {
     workEnd: CC.SLOT_WORKING_END,
     graceMin: CC.SLOT_GRACE_MIN,
     minGapMin: CC.SLOT_MIN_GAP_MIN,
-    now: input.now.getTime()
+    now: input.now.getTime(),
+    tz: input.tz || 'UTC'
   });
 
   if (!slot) return fallback;

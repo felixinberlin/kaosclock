@@ -19,7 +19,8 @@ function ccRoll(input, rng) {
   }
 
   const mode = feasible[pickIdx];
-  const duration = ccRollDuration(mode, time, rng);
+  // Zen: no dice for the duration either — take the middle of the range.
+  const duration = chaos === 0 ? ccMidDuration(mode, time) : ccRollDuration(mode, time, rng);
   const drift = ccRollDrift(chaos, rng);
   const phantom = chaos >= CC.PHANTOM_MIN_CHAOS && rng() < (chaos - CC.PHANTOM_MIN_CHAOS) / 200;
 
@@ -84,6 +85,12 @@ function ccRollDuration(mode, timeAvailable, rng) {
   const lo = Math.min(mode.min, hi);
   if (lo === hi) return lo;
   return ccRandMid(lo, hi, rng);
+}
+
+function ccMidDuration(mode, timeAvailable) {
+  const hi = Math.min(mode.max, timeAvailable);
+  const lo = Math.min(mode.min, hi);
+  return Math.round((lo + hi) / 2);
 }
 
 function ccRollDrift(chaos, rng) {

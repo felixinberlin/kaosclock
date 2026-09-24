@@ -39,7 +39,7 @@ function ccBuildResultCard(roll, sessionId, eventId, eventStart, eventEnd, extra
 }
 
 function ccFmtRange(start, end) {
-  const tz = Session.getScriptTimeZone();
+  const tz = ccUserTz();
   return Utilities.formatDate(start, tz, 'EEE HH:mm') + ' -> ' +
          Utilities.formatDate(end, tz, 'HH:mm');
 }

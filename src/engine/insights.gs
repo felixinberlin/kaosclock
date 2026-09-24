@@ -2,7 +2,8 @@
  * Pure insight computation from session history.
  * Returns an array of { type, message }.
  */
-function ccComputeInsights(sessions, now) {
+function ccComputeInsights(sessions, now, tz) {
+  tz = tz || 'UTC';
   const insights = [];
   const completed = sessions.filter(function (s) { return s.completed; });
 
@@ -48,7 +49,7 @@ function ccComputeInsights(sessions, now) {
   const hourFlow = {};
   for (let i = 0; i < completed.length; i++) {
     const s = completed[i];
-    const h = new Date(s.rolledAt).getHours();
+    const h = ccTzParts(new Date(s.rolledAt).getTime(), tz).hour;
     if (!hourFlow[h]) hourFlow[h] = { sum: 0, n: 0 };
     hourFlow[h].sum += Number(s.flow) || 0;
     hourFlow[h].n++;
